@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 mysql = {'host': 'localhost',
          'port': 'port'
@@ -6,5 +6,7 @@ mysql = {'host': 'localhost',
          'passwd': 'my secret password',
          'api_key':'<api_key>',
          'NOC_email': '<email>',
-         'ITSEC_email': '<email>'}
+         'ITSEC_email': '<email>',
+         'tmp': '<email>',
+         'cc': '<email>'}
 use_anonymous = True
