@@ -7,7 +7,7 @@ import ipaddress
 import requests
 import emailConfig as cfg
 #email functions libraries:
-import smtplib
+import smtplib, ssl
 from string import Template
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -22,8 +22,29 @@ def email_NOC(NOC_logs):
     print('This function will send these IPs to the NOC')
     print(NOC_logs)
 
-def email_ITSEC(ITSEC_logs, null_logs):
+def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     print('This function will send these IPs to IT Security', ITSEC_logs,". Null:",null_logs)
+    message = MIMEMultipart("alternative")
+    message['Subject'] = "Review these IP addresses found from ECOM DDI"
+    message['From'] = myaddr
+    message['To'] = ITSEC_email
+
+    text = (
+    "Hi IT Security,\n"
+    "Please review these IP addresses:\n"
+    "Consider blocking these IP's: {}\n"
+    "I could not find any information on these: {}\n"
+    "We sent the NOC these IP's to block: {}\n"
+    "Thanks,\n"
+    "turbo-waffle".format(ITSEC_logs,null_logs,NOC_logs))
+    p1 = MIMEText(text, "plain")
+    message.attach(p1)
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(myaddr, pw)
+        server.sendmail(
+            myaddr, ITSEC_email, message.as_string()
+        )
 
 def abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs):
     # DEBUG print("checking ip",ip)
@@ -83,8 +104,8 @@ def main():
     # DEBUG print("IP addresses appended to NOC:", NOC_logs)
     # DEBUG print("IP addresses appended to IT SEC:", ITSEC_logs)
     # DEBUG print("IP addresses returned as null or no information:", null_logs)
-    email_NOC(NOC_logs)
-    email_ITSEC(ITSEC_logs, null_logs)
+    # email_NOC(NOC_logs)
+    email_ITSEC(ITSEC_logs, null_logs, NOC_logs)
 
 if __name__ == '__main__':
     main()
