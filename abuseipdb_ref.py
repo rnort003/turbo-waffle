@@ -5,15 +5,18 @@ import json
 import time
 import ipaddress
 import requests
+import emailConfig as cfg
 #email functions libraries:
 import smtplib
 from string import Template
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-api_key = <omitted>
-email_addrs = <omitted>
-myaddr = <omitted>
+api_key = cfg.bones['api_key']
+ITSEC_email = cfg.bones['ITSEC_email']
+NOC_email = cfg.bones['NOC_email']
+myaddr = cfg.bones['user']
+pw = cfg.bones['passwd']
 
 def email_NOC(NOC_logs):
     print('This function will send these IPs to the NOC')

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-import preprocessing
+
 mysql = {'host': 'localhost',
          'port': 'port'
          'user': 'user',
-         'passwd': 'my secret password',}
-preprocessing_queue = [preprocessing.scale_and_center,
-                       preprocessing.dot_reduction,
-                       preprocessing.connect_lines]
+         'passwd': 'my secret password',
+         'api_key':'<api_key>',
+         'NOC_email': '<email>',
+         'ITSEC_email': '<email>'}
 use_anonymous = True
