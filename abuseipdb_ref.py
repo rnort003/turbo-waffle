@@ -5,7 +5,7 @@ import json
 import time
 import ipaddress
 import requests
-import emailConfig as cfg
+import configexample as cfg
 #email functions libraries:
 import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
@@ -17,15 +17,14 @@ NOC_email = cfg.bones['NOC_email']
 myaddr = cfg.bones['user']
 pw = cfg.bones['passwd']
 tmp = cfg.bones['tmp']
-cc = cfg.bones['cc']
+#cc = cfg.bones['cc']
 
 def email_NOC(NOC_logs):
     print('This function will send these IPs to the NOC', NOC_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "ECOM DDI Alert"
     message['From'] = myaddr
-    message['To'] = tmp
-    message['cc'] = cc
+    message['To'] = NOC_email
 
     text = (
     "Hi NOC,\n"
@@ -49,7 +48,7 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     message = MIMEMultipart("alternative")
     message['Subject'] = "Review these IP addresses found from ECOM DDI"
     message['From'] = myaddr
-    message['To'] = tmp
+    message['To'] = ITSEC_email
 
     text = (
     "Hi IT Security,\n"
@@ -80,22 +79,21 @@ def abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs):
         log = info[0]
         isWhitelisted = log['isWhitelisted']
         abuseConfidenceScore = int(log['abuseConfidenceScore'])
+        # DEBUG print("abuse confidence score is", abuseConfidenceScore," is whitelisted?", isWhitelisted)
+        if abuseConfidenceScore == 0:
+            null_logs.append(ip)
+            #DEBUG print('appended to null')
+        elif 0 < abuseConfidenceScore <= 30:
+            ITSEC_logs.append(ip)
+            # DEBUG print('appended to ITSEC')
+        elif 30 < abuseConfidenceScore <= 100:
+            NOC_logs.append(ip)
+            # DEBUG print('appended to NOC')
+        else:
+            # DEBUG print('unable to process')
+            null_logs.append(ip)
     else:
         # DEBUG print("info type is:", type(info))
-        null_logs.append(ip)
-
-    # DEBUG print("abuse confidence score is", abuseConfidenceScore," is whitelisted?", isWhitelisted)
-    if abuseConfidenceScore == 0:
-        null_logs.append(ip)
-        #DEBUG print('appended to null')
-    elif 0 < abuseConfidenceScore <= 30:
-        ITSEC_logs.append(ip)
-        # DEBUG print('appended to ITSEC')
-    elif 30 < abuseConfidenceScore <= 100:
-        NOC_logs.append(ip)
-        # DEBUG print('appended to NOC')
-    else:
-        # DEBUG print('unable to process')
         null_logs.append(ip)
 
 def get_latest_file():
@@ -126,7 +124,10 @@ def main():
     # DEBUG print("IP addresses appended to NOC:", NOC_logs)
     # DEBUG print("IP addresses appended to IT SEC:", ITSEC_logs)
     # DEBUG print("IP addresses returned as null or no information:", null_logs)
-    email_NOC(NOC_logs)
+    if NOC_logs:
+        email_NOC(NOC_logs)
+    else:
+        print("No logs sent to NOC")
     email_ITSEC(ITSEC_logs, null_logs, NOC_logs)
 
 if __name__ == '__main__':
