@@ -1,1 +1,31 @@
+_______________ _______________________ ________      
+\__    ___/    |   \______   \______   \\_____  \     
+  |    |  |    |   /|       _/|    |  _/ /   |   \    
+  |    |  |    |  / |    |   \|    |   \/    |    \   
+  |____|  |______/  |____|_  /|______  /\_______  /   
+                           \/        \/         \/    
+ __      __        ______________________.__          
+/  \    /  \_____  \_   _____/\_   _____/|  |   ____  
+\   \/\/   /\__  \  |    __)   |    __)  |  | _/ __ \
+ \        /  / __ \_|     \    |     \   |  |_\  ___/
+  \__/\  /  (____  /\___  /    \___  /   |____/\___  >
+       \/        \/     \/         \/              \/
+
+Author: Ryan Norton
 # turbo-waffle
+This is a tool to automate classifying and blocking IP Addresses
+
+Using the AbuseIPDB api, this program will look at the Abuse Confidence Score (ACS).
+This number can range from 0-100. If this number has ACS of more than 30 the IP
+will appended to a list to be emailed to the NOC to have them block the IP address
+on our load balancers. If the score is less than 30, the IP address will be emailed
+to the IT Security team to review. 
+
+## Installation
+this is built to be run along side a sumo logic script action. Put abuseipdb_ref.py
+into a new folder and point the list_of_files variable from the get_latest_file
+function to your alerts.
+
+### Usage
+Once installed, create a cron job to run the python3 script every time a new
+scrip action alert comes in. This will allow an instant action to take place.

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import glob
 import os
 import re
@@ -24,7 +25,7 @@ def email_NOC(NOC_logs):
     message = MIMEMultipart("alternative")
     message['Subject'] = "ECOM DDI Alert"
     message['From'] = myaddr
-    message['To'] = NOC_email
+    message['To'] = tmp
 
     text = (
     "Hi NOC,\n"
@@ -48,7 +49,7 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     message = MIMEMultipart("alternative")
     message['Subject'] = "Review these IP addresses found from ECOM DDI"
     message['From'] = myaddr
-    message['To'] = ITSEC_email
+    message['To'] = tmp
 
     text = (
     "Hi IT Security,\n"
