@@ -6,7 +6,7 @@ import json
 import time
 import ipaddress
 import requests
-import emailConfig as cfg
+import configexample as cfg
 #email functions libraries:
 import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
@@ -18,19 +18,20 @@ NOC_email = cfg.bones['NOC_email']
 myaddr = cfg.bones['user']
 pw = cfg.bones['passwd']
 tmp = cfg.bones['tmp']
+#cc = cfg.bones['cc']
 
 def email_NOC(NOC_logs):
     print('This function will send these IPs to the NOC', NOC_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "ECOM DDI Alert"
-    message['From'] = ITSEC_email
+    message['From'] = myaddr
     message['To'] = tmp
 
     text = (
     "Hi NOC,\n"
     "Please block the following ip addresses on the digital and ecom f5's for "
     "48 hours:\n"
-    "{}.\n\n"
+    "{}\n\n"
     "Thanks,\n"
     "turbo-waffle".format(NOC_logs))
 
@@ -40,22 +41,22 @@ def email_NOC(NOC_logs):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(myaddr, pw)
         server.sendmail(
-            'ITSecurity@bn.com', tmp, message.as_string()
+            myaddr, ITSEC_email, message.as_string()
         )
 
 def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     print('This function will send these IPs to IT Security', ITSEC_logs,". Null:",null_logs)
     message = MIMEMultipart("alternative")
-    message['Subject'] = "Please review these IP addresses found from ECOM DDI"
-    message['From'] = "ITSecurity@bn.com"
+    message['Subject'] = "Review these IP addresses found from ECOM DDI"
+    message['From'] = myaddr
     message['To'] = tmp
 
     text = (
     "Hi IT Security,\n"
     "Please review these IP addresses:\n"
-    "Consider blocking these IP's: {}.\n"
-    "I could not find any information on these: {}.\n"
-    "We sent the NOC these IP's to block: {}.\n\n"
+    "Consider blocking these IP's: {}\n"
+    "I could not find any information on these: {}\n"
+    "We sent the NOC these IP's to block: {}\n\n"
     "Thanks,\n"
     "turbo-waffle".format(ITSEC_logs,null_logs,NOC_logs))
     p1 = MIMEText(text, "plain")
@@ -64,7 +65,7 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(myaddr, pw)
         server.sendmail(
-            'ITSecurity@bn.com', tmp, message.as_string()
+            myaddr, ITSEC_email, message.as_string()
         )
 
 def abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs):
@@ -119,11 +120,8 @@ def main():
     # DEBUG print ("successfully obtained ip addr:",ipaddrs)
     for ip in ipaddrs:
         if ipaddress.ip_address(ip).is_private is False:
-            # DEBUG make sure it is not a Qualys IP
-            if ipaddress.ip_address(ip) in ipaddress.ip_network('64.39.96.0/20'):
-                ITSEC_logs.append(ip)
-            else:
-                abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs)
+            time.sleep(1)
+            abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs)
     # DEBUG print("IP addresses appended to NOC:", NOC_logs)
     # DEBUG print("IP addresses appended to IT SEC:", ITSEC_logs)
     # DEBUG print("IP addresses returned as null or no information:", null_logs)
