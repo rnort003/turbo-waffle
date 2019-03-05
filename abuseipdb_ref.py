@@ -23,9 +23,9 @@ tmp = cfg.bones['tmp']
 def email_NOC(NOC_logs):
     # DEBUG print('This function will send these IPs to the NOC', NOC_logs)
     message = MIMEMultipart("alternative")
-    message['Subject'] = "ECOM DDI Alert"
-    message['From'] = myaddr
-    message['To'] = tmp
+    message['Subject'] = "Please review these IP addresses found from ECOM DDI"
+    message['From'] = "ITSecurity@bn.com"
+    message['To'] = NOC_email
 
     text = (
     "Hi NOC,\n"
@@ -48,15 +48,15 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     # DEBUG print('This function will send these IPs to IT Security', ITSEC_logs,". Null:",null_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "Review these IP addresses found from ECOM DDI"
-    message['From'] = myaddr
-    message['To'] = tmp
+    message['From'] = "ITSecurity@bn.com"
+    message['To'] = ITSEC_email
 
     text = (
     "Hi IT Security,\n"
     "Please review these IP addresses:\n"
     "Consider blocking these IP's: {}\n"
-    "I could not find any information on these: {}\n"
-    "We sent the NOC these IP's to block: {}\n\n"
+    "\nI could not find any information on these: {}\n"
+    "\nWe sent the NOC these IP's to block: {}\n\n"
     "Thanks,\n"
     "turbo-waffle".format(ITSEC_logs,null_logs,NOC_logs))
     p1 = MIMEText(text, "plain")
