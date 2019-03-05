@@ -41,7 +41,7 @@ def email_NOC(NOC_logs):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(myaddr, pw)
         server.sendmail(
-            myaddr, ITSEC_email, message.as_string()
+            myaddr, NOC_email, message.as_string()
         )
 
 def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
