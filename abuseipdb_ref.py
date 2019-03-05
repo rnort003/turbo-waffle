@@ -21,7 +21,7 @@ tmp = cfg.bones['tmp']
 #cc = cfg.bones['cc']
 
 def email_NOC(NOC_logs):
-    print('This function will send these IPs to the NOC', NOC_logs)
+    # DEBUG print('This function will send these IPs to the NOC', NOC_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "ECOM DDI Alert"
     message['From'] = myaddr
@@ -45,7 +45,7 @@ def email_NOC(NOC_logs):
         )
 
 def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
-    print('This function will send these IPs to IT Security', ITSEC_logs,". Null:",null_logs)
+    # DEBUG print('This function will send these IPs to IT Security', ITSEC_logs,". Null:",null_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "Review these IP addresses found from ECOM DDI"
     message['From'] = myaddr
@@ -120,8 +120,11 @@ def main():
     # DEBUG print ("successfully obtained ip addr:",ipaddrs)
     for ip in ipaddrs:
         if ipaddress.ip_address(ip).is_private is False:
-            time.sleep(1)
-            abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs)
+            # DEBUG make sure it is not a Qualys IP
+            if ipaddress.ip_address(ip) in ipaddress.ip_network('64.39.96.0/20'):
+                ITSEC_logs.append(ip)
+            else:
+                abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs)
     # DEBUG print("IP addresses appended to NOC:", NOC_logs)
     # DEBUG print("IP addresses appended to IT SEC:", ITSEC_logs)
     # DEBUG print("IP addresses returned as null or no information:", null_logs)
