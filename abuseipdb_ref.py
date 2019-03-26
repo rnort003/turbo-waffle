@@ -6,7 +6,7 @@ import json
 import time
 import ipaddress
 import requests
-import configexample as cfg
+import emailConfig as cfg
 #email functions libraries:
 import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
@@ -68,40 +68,43 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
             myaddr, ITSEC_email, message.as_string()
         )
 
-def abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs):
-    # DEBUG print("checking ip",ip)
-    req = "https://www.abuseipdb.com/check/{}/json?key={}&days={}".format(ip, api_key, days)
+def abuseipdb_check(uip, bIPs, days, NOC_logs, ITSEC_logs, null_logs):
+    print("checking ip",uip)
+    req = "https://www.abuseipdb.com/check/{}/json?key={}&days={}".format(uip, api_key, days)
     info = requests.get(req).json()
     # DEBUG print(info)
     if not info:
         # DEBUG print("IF NOT INFO loop\n\n")
-        null_logs.append(ip)
+        null_logs.append(uip)
     elif type(info) is list:
         log = info[0]
         isWhitelisted = log['isWhitelisted']
         abuseConfidenceScore = int(log['abuseConfidenceScore'])
         # DEBUG print("abuse confidence score is", abuseConfidenceScore," is whitelisted?", isWhitelisted)
         if abuseConfidenceScore == 0:
-            null_logs.append(ip)
+            null_logs.append(uip)
             #DEBUG print('appended to null')
         elif 0 < abuseConfidenceScore <= 30:
-            ITSEC_logs.append(ip)
+            ITSEC_logs.append(uip)
             # DEBUG print('appended to ITSEC')
         elif 30 < abuseConfidenceScore <= 100:
-            NOC_logs.append(ip)
+            NOC_logs.append(uip)
+            bIPs.write(uip)
+            bIPs.write("\n")
             # DEBUG print('appended to NOC')
         else:
             # DEBUG print('unable to process')
-            null_logs.append(ip)
+            null_logs.append(uip)
     else:
         # DEBUG print("info type is:", type(info))
-        null_logs.append(ip)
+        null_logs.append(uip)
 
 def get_latest_file():
     list_of_files = glob.glob('./Log_Files/*')
     latest_file = max(list_of_files, key=os.path.getctime)
     ofile = open(latest_file, "r")
     recent_data = ofile.read()
+    ofile.close()
     return(recent_data)
 
 def isolate_ip(data):
@@ -113,26 +116,34 @@ def main():
     NOC_logs = []
     ITSEC_logs = []
     null_logs = []
+    unique_ipaddrs = []
     days = 30
     data = get_latest_file()
     # DEBUG print("obtained lateset file")
     ipaddrs = isolate_ip(data)
-    # DEBUG print ("successfully obtained ip addr:",ipaddrs)
+    print ("successfully obtained ip addr:",ipaddrs)
+    with open('blockedIPs.txt', 'r+') as bIPs:
+        xip = [line.strip() for line in bIPs]
+    print(xip)
     for ip in ipaddrs:
-        if ipaddress.ip_address(ip).is_private is False:
+        if ip not in xip:
+            unique_ipaddrs.append(ip)
+    for uip in unique_ipaddrs:
+        if ipaddress.ip_address(uip).is_private is False:
             # DEBUG make sure it is not a Qualys IP
-            if ipaddress.ip_address(ip) in ipaddress.ip_network('64.39.96.0/20'):
-                ITSEC_logs.append(ip)
+            if ipaddress.ip_address(uip) in ipaddress.ip_network('64.39.96.0/20'):
+                ITSEC_logs.append(uip)
             else:
-                abuseipdb_check(ip, days, NOC_logs, ITSEC_logs, null_logs)
-    # DEBUG print("IP addresses appended to NOC:", NOC_logs)
-    # DEBUG print("IP addresses appended to IT SEC:", ITSEC_logs)
-    # DEBUG print("IP addresses returned as null or no information:", null_logs)
-    if NOC_logs:
-        email_NOC(NOC_logs)
-    else:
-        print("No logs sent to NOC")
-    email_ITSEC(ITSEC_logs, null_logs, NOC_logs)
+                abuseipdb_check(uip, bIPs, days, NOC_logs, ITSEC_logs, null_logs)
+    print("IP addresses appended to NOC:", NOC_logs)
+    print("IP addresses appended to IT SEC:", ITSEC_logs)
+    print("IP addresses returned as null or no information:", null_logs)
+    bIPs.close()
+    # if NOC_logs:
+    #     email_NOC(NOC_logs)
+    # else:
+    #     print("No logs sent to NOC")
+    # email_ITSEC(ITSEC_logs, null_logs, NOC_logs)
 
 if __name__ == '__main__':
     main()
