@@ -6,7 +6,7 @@ import json
 import time
 import ipaddress
 import requests
-import emailConfig as cfg
+import configexample as cfg
 #email functions libraries:
 import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
@@ -30,7 +30,7 @@ def email_NOC(NOC_logs):
     text = (
     "Hi NOC,\n"
     "Please block the following ip addresses on the digital and ecom f5's for "
-    "48 hours:\n"
+    "72 hours:\n"
     "{}\n\n"
     "Thanks,\n"
     "turbo-waffle".format(NOC_logs))
@@ -56,7 +56,7 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     "Please review these IP addresses:\n"
     "Consider blocking these IP's: {}\n"
     "\nI could not find any information on these: {}\n"
-    "\nWe sent the NOC these IP's to block: {}\n\n"
+    "\nWe sent the NOC these IP's to block (72 hrs): {}\n\n"
     "Thanks,\n"
     "turbo-waffle".format(ITSEC_logs,null_logs,NOC_logs))
     p1 = MIMEText(text, "plain")
@@ -121,10 +121,11 @@ def main():
     data = get_latest_file()
     # DEBUG print("obtained lateset file")
     ipaddrs = isolate_ip(data)
-    print ("successfully obtained ip addr:",ipaddrs)
-    with open('blockedIPs.txt', 'r+') as bIPs:
+    #print ("successfully obtained ip addr:",ipaddrs)
+    with open('blockedIPs.txt', 'r') as bIPs:
         xip = [line.strip() for line in bIPs]
-    print(xip)
+    bIPs = open('blockedIPs.txt', 'a+')
+    #print(xip)
     for ip in ipaddrs:
         if ip not in xip:
             unique_ipaddrs.append(ip)
@@ -135,15 +136,15 @@ def main():
                 ITSEC_logs.append(uip)
             else:
                 abuseipdb_check(uip, bIPs, days, NOC_logs, ITSEC_logs, null_logs)
-    print("IP addresses appended to NOC:", NOC_logs)
-    print("IP addresses appended to IT SEC:", ITSEC_logs)
-    print("IP addresses returned as null or no information:", null_logs)
+    #print("IP addresses appended to NOC:", NOC_logs)
+    #print("IP addresses appended to IT SEC:", ITSEC_logs)
+    #print("IP addresses returned as null or no information:", null_logs)
     bIPs.close()
-    # if NOC_logs:
-    #     email_NOC(NOC_logs)
-    # else:
-    #     print("No logs sent to NOC")
-    # email_ITSEC(ITSEC_logs, null_logs, NOC_logs)
+    if NOC_logs:
+        email_NOC(NOC_logs)
+    else:
+        print("No logs sent to NOC")
+    email_ITSEC(ITSEC_logs, null_logs, NOC_logs)
 
 if __name__ == '__main__':
     main()
