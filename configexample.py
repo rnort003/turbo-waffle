@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-mysql = {'host': 'localhost',
+bones = {'host': 'localhost',
          'port': 'port'
          'user': 'user',
          'passwd': 'my secret password',
