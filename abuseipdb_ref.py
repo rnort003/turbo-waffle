@@ -24,7 +24,7 @@ def email_NOC(NOC_logs):
     # DEBUG print('This function will send these IPs to the NOC', NOC_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "Please review these IP addresses found from ECOM DDI"
-    message['From'] = "ITSecurity@bn.com"
+    message['From'] = "ITSecurity@company.com"
     message['To'] = NOC_email
 
     text = (
@@ -48,7 +48,7 @@ def email_ITSEC(ITSEC_logs, null_logs, NOC_logs):
     # DEBUG print('This function will send these IPs to IT Security', ITSEC_logs,". Null:",null_logs)
     message = MIMEMultipart("alternative")
     message['Subject'] = "Review these IP addresses found from ECOM DDI"
-    message['From'] = "ITSecurity@bn.com"
+    message['From'] = "ITSecurity@company.com"
     message['To'] = ITSEC_email
 
     text = (
